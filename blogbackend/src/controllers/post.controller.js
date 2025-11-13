@@ -42,11 +42,11 @@ export const createPost = asyncHandler(async (req, res) => {
 });
 
 
-// 🧩 Get All Posts (with search, author filter, pagination, sorting)
+// Get All Posts (with search, author filter, pagination, sorting)
 export const getAllPosts = asyncHandler(async (req, res) => {
   const filter = {};
 
-  // 1️⃣ Search by title or content
+  // Search by title or content
   if (req.query.search) {
     const searchRegex = new RegExp(req.query.search, "i");
     filter.$or = [
@@ -55,7 +55,7 @@ export const getAllPosts = asyncHandler(async (req, res) => {
     ];
   }
 
-  // 2️⃣ Filter by author (username)
+  // Filter by author (username)
   if (req.query.author) {
     const author = await User.findOne({ username: req.query.author });
     if (author) {
@@ -65,11 +65,11 @@ export const getAllPosts = asyncHandler(async (req, res) => {
     }
   }
 
-  // 3️⃣ Sorting (default: newest first)
+  //  Sorting (default: newest first)
   let sortOption = { createdAt: -1 };
   if (req.query.sortBy === "oldest") sortOption = { createdAt: 1 };
 
-  // 4️⃣ Pagination (default 6 posts per page)
+  // Pagination (default 6 posts per page)
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 6;
   const skip = (page - 1) * limit;
@@ -104,10 +104,33 @@ export const getAllPosts = asyncHandler(async (req, res) => {
 
 
 
+//  Get single post by ID
+export const getPostById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-/*
- Update a post (title, content, optional image)
- */
+  // Validate post ID format
+  if (!id) {
+    throw new ApiError(400, "Post ID is required");
+  }
+
+  // Find post and populate author info
+  const post = await Post.findById(id).populate(
+    "author",
+    "username fullName avatar"
+  );
+
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, post, "Post Detail fetched successfully"));
+});
+
+
+//  Update a post (title, content, optional image)
+
 export const updatePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
   const { title, content } = req.body;
@@ -146,9 +169,9 @@ export const updatePost = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedPost, "Post updated successfully"));
 });
 
-/*
-  Delete a post
- */
+
+  // Delete a post
+ 
 export const deletePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
 

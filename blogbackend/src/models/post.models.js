@@ -21,7 +21,17 @@ const postSchema = new Schema(
       ref: "User", // Reference to User model
       required: true,
     },
+
+     likes:[
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
+],
+  },
+
+ 
+
   {
     timestamps: true, // createdAt & updatedAt
   }
