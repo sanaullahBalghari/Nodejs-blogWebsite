@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import CreateEditPostPage from './pages/CreateEditPost.jsx';
 import PostDetailPage from './pages/PostDetailPage.jsx';
+import UserProfilePage from'./pages/UserProfile.jsx';
 
 
 // ⬇️ ADD THIS IMPORT

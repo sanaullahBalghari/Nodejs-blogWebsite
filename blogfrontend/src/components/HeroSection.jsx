@@ -19,9 +19,13 @@ function HeroSection({ setCurrentPage }) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {user ? (
-              <button onClick={() => setCurrentPage('create')} className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-lg font-semibold hover:opacity-90 transition shadow-lg">
-                Start Writing
-              </button>
+            <button 
+  onClick={() => setCurrentPage('create')}
+  className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-lg font-semibold hover:opacity-90 transition shadow-lg"
+>
+  Start Writing
+</button>
+
             ) : (
               <>
                 <button onClick={() => setCurrentPage('register')} className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-lg font-semibold hover:opacity-90 transition shadow-lg">

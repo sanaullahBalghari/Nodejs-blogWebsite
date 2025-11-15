@@ -3,9 +3,9 @@ import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("cloud name :", process.env.CLOUDINARY_CLOUD_NAME)
-console.log("api key  :", process.env.CLOUDINARY_API_KEY)
-console.log("api secert  key :", process.env.CLOUDINARY_API_SECRET)
+// console.log("cloud name :", process.env.CLOUDINARY_CLOUD_NAME)
+// console.log("api key  :", process.env.CLOUDINARY_API_KEY)
+// console.log("api secert  key :", process.env.CLOUDINARY_API_SECRET)
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
