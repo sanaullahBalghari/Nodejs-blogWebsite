@@ -1,30 +1,75 @@
-
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { Search, Moon, Sun, Menu, X, Heart, MessageCircle, Calendar, User, Edit, Trash2, LogOut, PenTool, Home, TrendingUp, Filter, ChevronLeft, ChevronRight, Upload, Eye, EyeOff, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Heart, Edit, Trash2, Calendar } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { mockPosts, mockUsers } from '../utils/mockData';
+import commentService from '../calls/commentService';
+import likeService from '../calls/likeService';
+import apiServer from '../utils/apiServer';
+import { POST_ROUTES } from '../utils/apiRoutes';
+
 // Post Detail Page
 function PostDetailPage({ post, setCurrentPage, setSelectedPost }) {
   const { isDark } = useTheme();
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([
-    { id: 1, user: mockUsers[1], text: 'Great article! Very informative.', createdAt: '2024-11-11' },
-    { id: 2, user: mockUsers[2], text: 'Thanks for sharing this. Really helpful!', createdAt: '2024-11-12' }
-  ]);
+  const [comments, setComments] = useState([]);
 
-  const handleAddComment = (e) => {
+  // Fetch comments and initial like state
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await commentService.getComments(post._id);
+        setComments(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const checkLiked = () => {
+      if (user && post.likes) {
+        setIsLiked(post.likes.some(id => id === user.id || id === user._id));
+      }
+    };
+
+    fetchComments();
+    checkLiked();
+  }, [post, user]);
+
+  // Handle like toggle
+  const handleToggleLike = async () => {
+    if (!user) return;
+    try {
+      const res = await likeService.toggleLike(post._id);
+      setIsLiked(res.data.liked);
+      setLikesCount(res.data.likes);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Add comment
+  const handleAddComment = async (e) => {
     e.preventDefault();
-    if (comment.trim() && user) {
-      setComments([...comments, {
-        id: comments.length + 1,
-        user: user,
-        text: comment,
-        createdAt: new Date().toISOString().split('T')[0]
-      }]);
+    if (!comment.trim() || !user) return;
+    try {
+      const res = await commentService.addComment(post._id, comment);
+      setComments([res.data, ...comments]);
       setComment('');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Delete post
+  const handleDeletePost = async () => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await apiServer('delete', POST_ROUTES.DELETE_POST(post._id), {}, { tokenRequired: true });
+      setCurrentPage('home');
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -54,12 +99,12 @@ function PostDetailPage({ post, setCurrentPage, setSelectedPost }) {
                   </div>
                 </div>
               </div>
-              {user && user.id === post.author.id && (
+              {user && (user.id === post.author._id || user.id === post.author.id) && (
                 <div className="flex space-x-2">
                   <button onClick={() => { setSelectedPost(post); setCurrentPage('edit'); }} className={`p-2 rounded-lg ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
                     <Edit className="w-5 h-5" />
                   </button>
-                  <button className={`p-2 rounded-lg ${isDark ? 'bg-red-900 text-red-200 hover:bg-red-800' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
+                  <button onClick={handleDeletePost} className={`p-2 rounded-lg ${isDark ? 'bg-red-900 text-red-200 hover:bg-red-800' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -72,15 +117,13 @@ function PostDetailPage({ post, setCurrentPage, setSelectedPost }) {
             {/* Content */}
             <div className={`prose prose-lg max-w-none mb-8 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               <p>{post.content}</p>
-              <p className="mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-              <p className="mt-4">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </div>
 
             {/* Like Button */}
             <div className="flex items-center space-x-4 pt-6 border-t border-gray-700">
-              <button onClick={() => setIsLiked(!isLiked)} className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition ${isLiked ? 'bg-red-500 text-white' : isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+              <button onClick={handleToggleLike} className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition ${isLiked ? 'bg-red-500 text-white' : isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                <span className="font-semibold">{post.likes + (isLiked ? 1 : 0)} Likes</span>
+                <span className="font-semibold">{likesCount} Likes</span>
               </button>
             </div>
           </div>
@@ -122,14 +165,14 @@ function PostDetailPage({ post, setCurrentPage, setSelectedPost }) {
           {/* Comments List */}
           <div className="space-y-6">
             {comments.map(c => (
-              <div key={c.id} className="flex space-x-4">
-                <img src={c.user.avatar} alt={c.user.fullName} className="w-12 h-12 rounded-full" />
+              <div key={c._id || c.id} className="flex space-x-4">
+                <img src={c.author?.avatar || c.user.avatar} alt={c.author?.fullName || c.user.fullName} className="w-12 h-12 rounded-full" />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-1">
-                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{c.user.fullName}</p>
-                    <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>• {c.createdAt}</span>
+                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{c.author?.fullName || c.user.fullName}</p>
+                    <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>• {new Date(c.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>{c.text}</p>
+                  <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>{c.content || c.text}</p>
                 </div>
               </div>
             ))}

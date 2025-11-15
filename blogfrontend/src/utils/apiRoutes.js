@@ -1,82 +1,52 @@
 // src/utils/apiRoutes.js
 
-/**
- * 🗺️ API Routes Configuration
- * 
- * All API endpoints are centralized here for easy management.
- * Update endpoints here instead of modifying apiServer.js
- * 
- * Backend Structure:
- * - Auth: /api/users/register, /api/users/login, /api/users/logout
- * - Posts: /api/posts
- * - Comments: /api/posts/:postId/comments
- * - Likes: /api/posts/:postId/like
- */
 
-// ============================================
-// 🔐 AUTHENTICATION ROUTES
-// ============================================
+// AUTHENTICATION ROUTES
+
 export const AUTH_ROUTES = {
-  REGISTER: "/api/users/register",
-  LOGIN: "/api/users/login",
-  LOGOUT: "/api/users/logout",
-  GET_CURRENT_USER: "/api/users/me", // If you have this endpoint
-  REFRESH_TOKEN: "/api/users/refresh-token", // If you implement this
+  REGISTER: "/api/v1/users/register",
+  LOGIN: "/api/v1/users/login",
+  LOGOUT: "/api/v1/users/logout",
+  CURRENT_USER: "/api/v1/users/me", // If you have this endpoint
+ 
 };
 
-// ============================================
-// 📝 POST ROUTES
-// ============================================
+
+// POST ROUTES
+
 export const POST_ROUTES = {
-  // Get all posts (supports query params: page, limit, search, author, sortBy)
-  GET_ALL_POSTS: "/api/posts",
+  GET_ALL_POSTS: "/api/v1/posts",
+  GET_POST_BY_ID: (postId) => `/api/v1/posts/${postId}`,
+  CREATE_POST: "/api/v1/posts",
+  UPDATE_POST: (postId) => `/api/v1/posts/${postId}`,
+  DELETE_POST: (postId) => `/api/v1/posts/${postId}`,
   
-  // Get single post by ID
-  GET_POST_BY_ID: (postId) => `/api/posts/${postId}`,
-  
-  // Create new post (requires auth)
-  CREATE_POST: "/api/posts",
-  
-  // Update post (requires auth + ownership)
-  UPDATE_POST: (postId) => `/api/posts/${postId}`,
-  
-  // Delete post (requires auth + ownership)
-  DELETE_POST: (postId) => `/api/posts/${postId}`,
-  
-  // Search posts (if you have separate search endpoint)
-  SEARCH_POSTS: "/api/posts/search",
-  
-  // Get posts by specific user (if you have this endpoint)
-  GET_USER_POSTS: (username) => `/api/posts/user/${username}`,
 };
 
-// ============================================
-// 💬 COMMENT ROUTES
-// ============================================
+
+// COMMENT ROUTES
+
 export const COMMENT_ROUTES = {
-  // Get all comments for a post (public)
-  GET_COMMENTS: (postId) => `/api/posts/${postId}/comments`,
-  
-  // Add comment to a post (requires auth)
-  ADD_COMMENT: (postId) => `/api/posts/${postId}/comments`,
-  
-  // Update comment (if you implement this)
-  UPDATE_COMMENT: (postId, commentId) => `/api/posts/${postId}/comments/${commentId}`,
-  
-  // Delete comment (if you implement this)
-  DELETE_COMMENT: (postId, commentId) => `/api/posts/${postId}/comments/${commentId}`,
+  GET_COMMENTS: (postId) => `/api/v1/comments/${postId}/comments`,
+  ADD_COMMENT: (postId) => `/api/v1/comments/${postId}/comments`,
+
+// later 
+  UPDATE_COMMENT: (postId, commentId) => `/api/v1/comments/${postId}/comments/${commentId}`,
+  DELETE_COMMENT: (postId, commentId) =>`/api/v1/comments/${postId}/comments/${commentId}`,
 };
 
-// ============================================
-// ❤️ LIKE ROUTES
-// ============================================
+
+// Like Routes 
 export const LIKE_ROUTES = {
-  // Toggle like/unlike on a post (requires auth)
-  TOGGLE_LIKE: (postId) => `/api/posts/${postId}/like`,
-  
-  // Get all likes for a post (if you have this endpoint)
-  GET_POST_LIKES: (postId) => `/api/posts/${postId}/likes`,
+  TOGGLE_LIKE: (postId) => `/api/v1/likes/${postId}/like`,
+
+  // ❤️ Get all likes for a post (ONLY if you implement this later)
+  GET_POST_LIKES: (postId) => `/api/v1/likes/${postId}/likes`,
 };
+
+
+
+
 
 // ============================================
 // 👤 USER/PROFILE ROUTES (if you implement these)

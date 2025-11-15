@@ -36,7 +36,7 @@ const apiServer = async (
   data = {},
   {
     tokenRequired = false,
-    showNotification = true,
+    showNotification = false,
     showErrorNotification = true,
     headers = {},
     isFormData = false,
@@ -127,6 +127,7 @@ const apiServer = async (
       const responseData = error.response.data;
       statusCode = error.response.status;
 
+      // ✅ Extract error message from backend ApiError structure
       errorMessage =
         responseData?.message ||
         responseData?.errors?.[0] ||
@@ -145,13 +146,14 @@ const apiServer = async (
           window.location.href = "/login";
         }, 1500);
       } else if (statusCode === 403) {
-        errorMessage = "Access forbidden. You don't have permission.";
+        errorMessage = responseData?.message || "Access forbidden. You don't have permission.";
       } else if (statusCode === 404) {
         errorMessage = responseData?.message || "Resource not found.";
       } else if (statusCode === 409) {
+        // ✅ IMPORTANT: Extract the actual message for 409 conflicts
         errorMessage = responseData?.message || "Resource already exists.";
       } else if (statusCode === 500) {
-        errorMessage = "Server error. Please try again later.";
+        errorMessage = responseData?.message || "Server error. Please try again later.";
       }
     } else if (error.request) {
       // Request made but no response received
@@ -161,7 +163,7 @@ const apiServer = async (
       errorMessage = error.message || errorMessage;
     }
 
-    // ✅ Show error notification
+    // ✅ Show error notification if enabled
     if (showErrorNotification) {
       showToast("error", errorMessage);
     }
@@ -176,8 +178,15 @@ const apiServer = async (
       });
     }
 
-    // ❌ Re-throw error for caller to handle if needed
-    throw error;
+    // ✅ FIXED: Create a new error object with the extracted message
+    // This ensures the error message is accessible in catch blocks
+    const customError = new Error(errorMessage);
+    customError.response = error.response; // Preserve original response
+    customError.statusCode = statusCode;
+    customError.originalError = error;
+
+    // ❌ Throw the custom error with proper message
+    throw customError;
   }
 };
 

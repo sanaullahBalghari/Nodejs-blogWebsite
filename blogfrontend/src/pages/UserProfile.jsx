@@ -1,12 +1,33 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Moon, Sun, Menu, X, Heart, MessageCircle, Calendar, User, Edit, Trash2, LogOut, PenTool, Home, TrendingUp, Filter, ChevronLeft, ChevronRight, Upload, Eye, EyeOff, Check } from 'lucide-react';
+import PostCard from '../components/PostCard';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { fetchAllPosts } from '../calls/postService'; // <-- Use your post service
 
 // User Profile Page
 function UserProfilePage({ setCurrentPage, setSelectedPost, profileUser = null }) {
   const { isDark } = useTheme();
   const { user } = useAuth();
   const displayUser = profileUser || user;
-  const userPosts = mockPosts.filter(post => post.author.id === displayUser?.id);
+
+  const [userPosts, setUserPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (displayUser) {
+      // Fetch posts by current user
+      fetchAllPosts({ author: displayUser.username })
+        .then(res => {
+          setUserPosts(res.data.posts || []);
+        })
+        .catch(err => {
+          console.error('Error fetching user posts:', err);
+          setUserPosts([]);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [displayUser]);
 
   if (!displayUser) {
     return (
@@ -31,6 +52,7 @@ function UserProfilePage({ setCurrentPage, setSelectedPost, profileUser = null }
             <div className="flex-1 text-center md:text-left">
               <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{displayUser.fullName}</h1>
               <p className={`text-lg mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>@{displayUser.username}</p>
+              <p className={`text-lg mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{displayUser.email}</p>
               <p className={`mb-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{displayUser.bio}</p>
               <div className="flex flex-wrap gap-6 justify-center md:justify-start">
                 <div>
@@ -38,10 +60,11 @@ function UserProfilePage({ setCurrentPage, setSelectedPost, profileUser = null }
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Posts</p>
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {userPosts.reduce((sum, post) => sum + post.likes, 0)}
-                  </p>
-                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total Likes</p>
+               <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+  {userPosts.reduce((sum, post) => sum + (post.likes?.length || 0), 0)}
+</p>
+<p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total Likes</p>
+
                 </div>
               </div>
             </div>
@@ -53,10 +76,13 @@ function UserProfilePage({ setCurrentPage, setSelectedPost, profileUser = null }
           <h2 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {profileUser ? `Posts by ${profileUser.fullName}` : 'My Posts'}
           </h2>
-          {userPosts.length > 0 ? (
+
+          {loading ? (
+            <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading posts...</p>
+          ) : userPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {userPosts.map(post => (
-                <PostCard key={post.id} post={post} setCurrentPage={setCurrentPage} setSelectedPost={setSelectedPost} />
+                <PostCard key={post._id} post={post} setCurrentPage={setCurrentPage} setSelectedPost={setSelectedPost} />
               ))}
             </div>
           ) : (

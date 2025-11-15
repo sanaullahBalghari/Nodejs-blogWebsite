@@ -31,7 +31,8 @@ function PostCard({ post, setCurrentPage, setSelectedPost }) {
           <div className="flex items-center space-x-4">
             <button onClick={() => setIsLiked(!isLiked)} className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : isDark ? 'text-gray-400' : 'text-gray-500'} hover:text-red-500 transition`}>
               <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              <span>{post.likes + (isLiked ? 1 : 0)}</span>
+             <span>{(post.likes?.length || 0) + (isLiked ? 1 : 0)}</span>
+
             </button>
             <button className={`flex items-center space-x-1 ${isDark ? 'text-gray-400' : 'text-gray-500'} hover:text-blue-500 transition`}>
               <MessageCircle className="w-5 h-5" />

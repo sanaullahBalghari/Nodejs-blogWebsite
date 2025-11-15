@@ -139,7 +139,7 @@ export const logoutUser = async () => {
  */
 export const getCurrentUser = async () => {
   try {
-    const response = await apiServer("get", AUTH_ROUTES.GET_CURRENT_USER, {}, {
+    const response = await apiServer("get", AUTH_ROUTES.CURRENT_USER, {}, {
       tokenRequired: true,
       showNotification: false,
     });
