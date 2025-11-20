@@ -43,6 +43,8 @@ function HomePage({ setCurrentPage, setSelectedPost, searchQuery }) {
       }
 
       // Add sorting - backend expects "oldest" or default (newest)
+      // Add sorting - backend expects "oldest" or default (newest)
+      // Add sorting - backend expects "oldest" or default (newest)
       if (sortBy === "oldest") {
         queryParams.sortBy = "oldest";
       }
