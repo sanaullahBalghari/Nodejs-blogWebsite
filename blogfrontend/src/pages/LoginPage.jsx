@@ -9,6 +9,8 @@ function LoginPage({ setCurrentPage }) {
   const { login } = useAuth();
   
   // Form state
+  // Form state
+  // Form state
   const [formData, setFormData] = useState({
     emailOrUsername: '',
     password: ''
