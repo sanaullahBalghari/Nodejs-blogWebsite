@@ -17,6 +17,8 @@ function LoginPage({ setCurrentPage }) {
   });
   
   // UI state
+  // UI state
+  // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
